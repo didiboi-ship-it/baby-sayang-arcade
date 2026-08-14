@@ -1,9 +1,9 @@
-// Couple Card Battle V1 - fast round balance
+// Couple Card Battle V1 - quick battle
 const CARD_DECK=['attack','attack','attack','heal','heal','protect','protect','steal','skip','rare'];
 const CARD_INFO={attack:['💥','Attack','-2 ❤️'],heal:['💗','Heal','+1 ❤️'],protect:['🛡️','Protect','Block next hit'],steal:['😈','Steal Heart','Steal 1 ❤️'],skip:['😏','Skip','Skip their turn'],rare:['💌','Love Letter','+2 ❤️ + shield']};
 const drawCard=()=>CARD_DECK[Math.floor(Math.random()*CARD_DECK.length)];
-const hand=()=>Array.from({length:5},drawCard);
-function freshBattle(){return {phase:'battle',turn:'host',host:{hp:5,shield:false,hand:hand()},guest:{hp:5,shield:false,hand:hand()},winner:null,log:'Fast round begins — 5 hearts each ❤️'};}
+const hand=()=>Array.from({length:3},drawCard);
+function freshBattle(){return {phase:'battle',turn:'host',host:{hp:5,shield:false,hand:hand()},guest:{hp:5,shield:false,hand:hand()},winner:null,log:'Quick Battle — 5 hearts, 3 cards each ❤️'};}
 function showBattle(room){const s=room.game_state;if(!s||s.phase!=='battle')return;$('roomPanel').classList.add('hidden');$('battlePanel').classList.remove('hidden');$('battleRoomCode').textContent=room.room_code;$('babyName').textContent=room.host_name||'Baby';$('sayangName').textContent=room.guest_name||'Sayang';$('babyHp').textContent='❤️'.repeat(Math.max(0,s.host.hp))||'💔';$('sayangHp').textContent='❤️'.repeat(Math.max(0,s.guest.hp))||'💔';const me=isHost?'host':'guest',my=s[me];$('turnText').textContent=s.winner?`${s.winner==='host'?room.host_name:room.guest_name} wins! 🏆❤️`:(s.turn===me?'Your turn 🃏':'Waiting for your person...');$('battleLog').textContent=s.log||'';const area=$('myHand');area.innerHTML='';my.hand.forEach((type,i)=>{const [em,n,desc]=CARD_INFO[type],b=document.createElement('button');b.className='battle-card';b.disabled=!!s.winner||s.turn!==me;b.innerHTML=`<span>${em}</span><b>${n}</b><small>${desc}</small>`;b.onclick=()=>playBattleCard(i);area.appendChild(b)});$('rematchBtn').classList.toggle('hidden',!s.winner||!isHost)}
 async function startCardBattle(){if(!currentRoom?.guest_name)return;if(!isHost){alert('Host starts the battle ❤️');return}await updateBattle(freshBattle(),'card-battle','playing')}
 async function updateBattle(state,selected='card-battle',status='playing'){const {data,error}=await db.from('arcade_rooms').update({selected_game:selected,status,game_state:state}).eq('id',currentRoom.id).select().single();if(error){console.error(error);alert('Sync problem. Try again ❤️');return}renderRoom(data)}
